@@ -18,7 +18,8 @@ public class TaskRepository {
     private SourceDatabaseConfiguration configuration;
 
     public String getStringFromResultSet(String query) throws TransferException {
-        System.out.println("PROPERTIES Postgres: " + configuration.getDb_url() + ", " +  configuration.getDb_username() + ", " + configuration.getDb_password());
+        logger.debug("Connection to Postgres: " + configuration.getDb_url() + ", " +  configuration.getDb_username() + ", " + configuration.getDb_password());
+
         try (Connection conn = DriverManager.getConnection(
                 configuration.getDb_url(),
                 configuration.getDb_username(),
@@ -36,20 +37,20 @@ public class TaskRepository {
             }
             return value;
         }catch (SQLException e) {
-            logger.error("Failed to connect to PG", e);
-            throw new TransferException("Failed to connect to PG", e);
+            logger.error("Failed to connect to Postgres", e);
+            throw new TransferException("Failed to connect to Postgres", e);
         }
     }
 
 
-
     public String getProjectID(int taskId){
-        String projectIDromTasks = "";
+        logger.debug("Retrieving ProjectID from Postgres");
+        String projectIDFromTasks = "";
         String idFromProjects = "";
         try {
-            String queryTask = "SELECT  \"ProjectID\" FROM \"public\".\"Task\" WHERE \"InternalID\" = " + taskId + " and \"ProjectVersion\" = 1"; // returns '56371'
-            projectIDromTasks = getStringFromResultSet(queryTask);
-            String queryProject = "SELECT \"ID\" FROM \"public\".\"Project\" WHERE \"InternalID\" = " + projectIDromTasks + " and \"Version\" = 1"; // Returns '17023'
+            String queryTask = "SELECT \"ProjectID\" FROM \"homework\".\"Task\" WHERE \"InternalID\" = " + taskId + " and \"ProjectVersion\" = 1"; // returns '56371'
+            projectIDFromTasks = getStringFromResultSet(queryTask);
+            String queryProject = "SELECT \"ID\" FROM \"homework\".\"Project\" WHERE \"InternalID\" = " + projectIDFromTasks + " and \"Version\" = 1"; // Returns '17023'
             idFromProjects = getStringFromResultSet(queryProject);
         }catch (TransferException e) {
             logger.error("Failed to get field from PG", e);
@@ -60,10 +61,8 @@ public class TaskRepository {
 
     public String findTask(int taskId) {
         logger.info("find Task started");
-        String valueToReturn = "";
-        String projectID = getProjectID(taskId);
         Assert.notNull(taskId, "The task's taskId must not be null");
-        return valueToReturn;
+        return getProjectID(taskId);
     }
 }
 
